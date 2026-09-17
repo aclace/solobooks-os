@@ -1,76 +1,88 @@
 # Solobooks OS
 
-A blank starter template for a personal "operating system" dashboard — one
-app that centralizes your projects, goals, finances, and content instead of
-juggling five separate tools.
+A starter template for a personal "operating system" dashboard — one app
+that centralizes your ventures, projects, goals, finances, and content
+instead of juggling five separate tools.
 
-This is a **template**, not a hosted product. Everything ships empty. There
-is no demo account, no sample business data, and no tracking. You clone it,
-plug in your own optional backend, and it's yours.
+This is a **template**, not a hosted product. Every section below ships
+with clearly-labeled **demo data** so you can see the whole thing working —
+there is no real account, no real business data, and no live API
+connections baked in. You clone it, plug in your own optional backend and
+AI provider, and replace the demo data with your own.
 
 ## What this is
 
-- A Next.js 14 (App Router) + TypeScript + Tailwind CSS application shell.
-- A left-nav layout with six starter modules: **Dashboard, Projects, Goals,
-  Finances, Content, Profile** — each rendering a clean empty state until you
-  add data.
-- A small reusable UI kit (`Button`, `Card`, `EmptyState`) to build new
-  modules on top of.
-- Optional integration points for Supabase (data + auth) and an AI provider
-  of your choice — both are stubbed out and clearly marked "not connected"
-  until you configure them. Nothing fakes a live connection.
+A Next.js 14 (App Router) + TypeScript + Tailwind CSS app with a dark,
+cinematic UI (deep maroon ground, coral accent, glassy cards — swap the
+palette in `tailwind.config.ts` for your own brand). It includes:
+
+- **Command Center** — a dashboard with a hero venture card, today's
+  missions, a content-pipeline preview, a revenue ring, active goals, and a
+  "needs attention" panel.
+- **Ventures** — the hubs everything else belongs to (a business, a
+  channel, a side project).
+- **Creator Studio** — YouTube channels, blogs, and a **Thumbnail Studio**
+  (reference-image upload + a results panel that clearly shows "connect
+  your AI key to enable generation" instead of faking a response).
+- **Content Hub** — every video/short/blog/social post tracked through an
+  8-stage pipeline: Idea → Research → Script → Production → Editing →
+  Thumbnail → Ready → Published.
+- **Media Library**, **Missions**, **Projects**, **Goals**, **Finances**
+  (revenue/expense ring + transactions).
+- **Settings & Integrations** — a first-class "AI plug-in slot" pattern:
+  every optional integration (AI provider, thumbnail generator, blog
+  publisher, CLI, media storage) is a card that plainly says "Not connected
+  — add your key" until you configure it yourself.
+- A **first-run checklist** on the dashboard and a **SETUP-WITH-CLAUDE.md**
+  guide that an AI coding agent can use to interview you about which
+  integrations you want and tell you exactly what to add to your own
+  `.env.local` — it never touches your accounts directly.
 
 ## What this is not
 
 - Not a hosted SaaS — you run and deploy your own copy.
-- Not pre-loaded with anyone's real data, account, or API keys.
-- Not tied to any specific backend — Supabase is one option, not a
-  requirement; the app runs fine on the built-in empty seed data with zero
+- Not pre-loaded with anyone's real data, account, or API keys. Every name,
+  venture, and metric you see (Studio One, Demo Channel, Weekend Build,
+  etc.) is fake sample content, clearly labeled "(demo)" throughout.
+- Not tied to any specific backend or AI provider — Supabase and an AI
+  provider are both optional; the app runs fully on demo data with zero
   configuration.
-
-## Feature list
-
-- App Router layout with a persistent sidebar + topbar shell
-- Six starter pages, each with a typed empty state and a "what to do next" hint
-- Central data model in `lib/data.ts` (swap the empty arrays for a real
-  fetch whenever you're ready)
-- Optional Supabase client wrapper (`lib/supabase/client.ts`) that returns
-  `null` until you provide credentials, instead of throwing
-- Optional AI hook (`lib/ai.ts`) that reports "not connected" until you wire
-  up a provider — no fake responses
-- Dark UI theme via CSS custom properties, easy to reskin
 
 ## Architecture overview
 
 ```
-app/
-  layout.tsx              root HTML shell
-  page.tsx                redirects to /dashboard
-  (app)/
-    layout.tsx             sidebar + main content shell
-    dashboard/page.tsx
-    projects/page.tsx
-    goals/page.tsx
-    finances/page.tsx
-    content/page.tsx
-    profile/page.tsx
+app/(app)/
+  layout.tsx             icon rail + hub rail shell
+  page.tsx                Command Center
+  ventures/               Ventures
+  studio/                 Creator Studio (channels, blogs, pipeline)
+  studio/thumbnails/      Thumbnail Studio
+  content/                Content Hub
+  media/                  Media Library
+  missions/               Missions
+  projects/               Projects
+  goals/                  Goals
+  finances/               Finances
+  settings/               Settings & integration slots
 components/
-  layout/Sidebar.tsx, Topbar.tsx
-  ui/Button.tsx, Card.tsx, EmptyState.tsx
+  layout/                 Sidebar (icon rail), HubRail, Topbar, PageHeader
+  ui/EntityModal.tsx      shared "add new X" modal + form fields
+  *Board.tsx / *Panel.tsx  one component per module, each owns its own
+                           local state (no backend required)
+  IntegrationCard.tsx      the AI plug-in slot pattern
+  FirstRunChecklist.tsx    dismissible onboarding banner (localStorage)
 lib/
-  data.ts                 types + empty seed data (your data model lives here)
-  ai.ts                   placeholder AI integration point
-  supabase/client.ts      placeholder Supabase integration point
+  types.ts                 the full data model
+  data.ts                  DEMO DATA — replace with your own
+  format.ts                shared color/formatting helpers
+  ai.ts                    placeholder AI integration point
+  supabase/client.ts       optional Supabase integration point
 ```
 
-Each page reads from `lib/data.ts`. To go from "empty template" to "your
-real dashboard," you have two options:
-
-1. **Keep it simple** — populate the arrays in `lib/data.ts` directly (fine
-   for a single-user, file-backed setup).
-2. **Add a backend** — create your own Supabase project, add its URL/key to
-   `.env.local`, and replace the static arrays with calls to
-   `lib/supabase/client.ts`.
+Every module manages its own list in local React state, seeded from
+`lib/data.ts`. "Add" buttons work immediately (no backend needed) but
+nothing persists across a reload until you wire a page up to your own
+database — `lib/supabase/client.ts` is one starting point.
 
 ## Install steps
 
@@ -81,19 +93,18 @@ npm run dev
 ```
 
 The app runs at `http://localhost:3000` with no environment variables set
-at all — every module just shows its empty state.
+at all, showing the full demo dashboard.
 
 ## Environment variables
 
 All of these are **optional**. Copy `.env.example` to `.env.local` and fill
-in only the ones you want:
+in only the ones you want — see **SETUP-WITH-CLAUDE.md** for a guided,
+question-by-question walkthrough.
 
-| Variable | Required for | Where to get it |
+| Variable | Enables | Where to get it |
 |---|---|---|
-| `SUPABASE_URL` | Real data persistence + auth | Your own project at supabase.com → Project Settings → API |
-| `SUPABASE_ANON_KEY` | Real data persistence + auth | Same as above |
-| `AI_PROVIDER` | Enabling `lib/ai.ts` | Your choice of provider name |
-| `AI_API_KEY` | Enabling `lib/ai.ts` | Your chosen provider's dashboard |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Real data persistence + the Media Library storage slot | Your own project at supabase.com → Project Settings → API |
+| `AI_PROVIDER` / `AI_API_KEY` | `lib/ai.ts`, the dashboard's "Ask your AI provider" card, and Thumbnail Studio generation | Your chosen provider's dashboard |
 
 `.env.local` is gitignored — never commit real values. `.env.example`
 contains placeholder names only.
@@ -102,6 +113,8 @@ contains placeholder names only.
 
 - No real credentials, tokens, or personal data ship in this repository.
 - `.env.local` (and any other local env file) is excluded via `.gitignore`.
+- Every integration slot on the Settings page is disabled by default and
+  only activates once you supply your own credentials in `.env.local`.
 - The optional Supabase client only activates when you supply your own
   project's URL/key — it never talks to any pre-existing project.
 - The optional AI hook never calls out to any provider until you configure
@@ -111,57 +124,53 @@ contains placeholder names only.
 
 ## Troubleshooting
 
-- **Blank/empty pages after `npm run dev`** — this is expected. Every
-  module starts empty; add data to `lib/data.ts` or connect Supabase.
-- **TypeScript path errors (`@/...`)** — make sure you're running commands
-  from the project root; the `@/*` alias is defined in `tsconfig.json`.
+- **Everything shows fake "(demo)" data** — expected. Replace the arrays in
+  `lib/data.ts` with your own, or wire pages up to Supabase.
+- **TypeScript path errors (`@/...`)** — run commands from the project
+  root; the `@/*` alias is defined in `tsconfig.json`.
 - **Supabase calls silently return `null`** — `getSupabaseClient()` returns
   `null` on purpose when `SUPABASE_URL`/`SUPABASE_ANON_KEY` aren't set;
   that's the "not configured yet" signal, not a bug.
-- **Styles look unstyled** — run `npm install` again; Tailwind's build step
-  needs its dev dependencies installed.
+- **Thumbnail Studio always says "Connect your AI key"** — expected until
+  you set `AI_PROVIDER`/`AI_API_KEY` and implement the real request in
+  `lib/ai.ts`.
+- **Added items disappear on refresh** — local component state isn't
+  persisted; that's by design until you connect a real database.
 
 ## AI Agent Setup Instructions
 
-If you're an AI coding agent installing this template for a user, follow
-this exactly:
+See **[SETUP-WITH-CLAUDE.md](./SETUP-WITH-CLAUDE.md)** for the full,
+question-by-question script. Summary:
 
-**What this app does:** renders a personal dashboard shell with six empty
-modules. It has no backend requirement — it runs immediately after
-`npm install && npm run dev`.
+**What this app does:** a personal dashboard with a full demo-data feature
+set (ventures, content, projects, goals, finances) and a first-class
+"integration slot" pattern for optionally connecting an AI provider,
+Supabase, a blog, or a CLI.
 
 **What you (the agent) may configure automatically:**
-- Run `npm install`.
-- Copy `.env.example` to `.env.local`.
-- Start the dev server and verify the app loads at `localhost:3000`.
-- Edit template code (pages, components, `lib/data.ts`) at the user's
-  direction.
+- Run `npm install`, copy `.env.example` to `.env.local`, start the dev
+  server, and verify it loads.
+- Edit template code at the user's direction, including implementing a
+  real integration once the user has added their own credentials.
 
 **What you must ask the USER to provide, and where:**
-- A Supabase project URL + anon key, if they want real persistence —
-  they create this themselves at supabase.com (an agent should never
-  create third-party accounts on a user's behalf). They add it to their own
-  local `.env.local`, never to a file you commit.
-- An AI provider API key, if they want `lib/ai.ts` enabled — same rule:
-  their own account, their own local `.env.local`.
+- A Supabase project URL + anon key, if they want real persistence — their
+  own account, added to their own local `.env.local`.
+- An AI provider API key, if they want the AI hooks enabled — same rule.
+- Any other integration's credentials (Notion, a blog CMS, etc.) — always
+  the user's own account, always their own local `.env.local`.
 
 **What you (the agent) can NOT access:**
-- You cannot see or infer the user's Supabase project, database contents,
-  or API keys — none exist in this template, and none should ever be
-  committed to it.
-- You have no access to any account on the user's behalf. Every
-  integration in this template is opt-in and configured locally by the
-  user.
+- No real Supabase project, database, or API key exists in this template.
+- You have no access to any account on the user's behalf — every
+  integration is opt-in and configured locally by the user.
 
 **How to verify the install worked:**
-1. `npm run dev` starts without errors.
-2. `http://localhost:3000` redirects to `/dashboard` and shows the empty
-   dashboard state.
-3. Each of the six nav items (Projects, Goals, Finances, Content, Profile)
-   loads its own empty state without errors.
-4. If the user provided Supabase credentials, confirm
-   `getSupabaseClient()` returns a non-null client rather than assuming
-   it works.
+1. `npm run dev` starts without errors and shows the demo dashboard.
+2. Every nav item (Ventures, Creator Studio, Content Hub, Media Library,
+   Missions, Projects, Goals, Finances, Settings) loads its demo content.
+3. If the user connected an integration, confirm its Settings-page slot no
+   longer says "Not connected" and the feature actually works end to end.
 
 ## You Must Do Manually
 
@@ -172,9 +181,12 @@ accounts and credentials:
 - [ ] Copy your Supabase project's URL and anon key into your local
       `.env.local`
 - [ ] Choose an AI provider and get your own API key, if you want the AI
-      hooks enabled
+      hooks or Thumbnail Studio generation enabled
 - [ ] Add your AI provider's key to your local `.env.local`
-- [ ] Replace the placeholder profile (`lib/data.ts`) with your own name/email/bio
+- [ ] Replace the demo data in `lib/data.ts` with your own ventures,
+      projects, goals, and content
+- [ ] Replace the placeholder profile (`lib/data.ts`) with your own
+      name/email/bio
 - [ ] Deploy to your own hosting (Vercel, or any Node-compatible host) under
       your own account
 
